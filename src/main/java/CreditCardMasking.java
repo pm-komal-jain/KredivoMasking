@@ -11,10 +11,8 @@
      for eg. notification service that sends out sms or email on settled transactions.
  */
 
-import java.security.InvalidParameterException;
 import java.util.Scanner;
-import org.apache.commons.lang3.StringUtils;
-import java.util.regex.Matcher;
+//import org.apache.commons.lang3.StringUtils;
 import java.util.regex.Pattern;
 import java.lang.StringBuilder;
 
@@ -50,20 +48,24 @@ public class CreditCardMasking {
     }
 
     public String validateMaskingChar(){
-        String specialChars = "/*!@#$%^&*()\"{}_[]|\\?/<>,.Xx";
-        if(!specialChars.contains(""+maskingChar)) {
+        String specialChars = "/*!@#%^&*()\"{}_[]|\\?/<>,.Xx";
+        if((""+maskingChar).equals("$")) {
+            throw new IllegalArgumentException("The program will not support $ as special charater for now");
+        } else if(!specialChars.contains(""+maskingChar)) {
             return "Its advised to use a special char or 'X' for masking";
         }
         return "Acceptable Masking char";
     }
 
     public StringBuilder maskCreditCardNumber(){
-        String maskedSeq = StringUtils.repeat(""+maskingChar, creditCardNumber.length()-4) + creditCardNumber.substring(creditCardNumber.length()-4);
-        /*System.out.println("Masked string " + maskedSeq);
-        String separatedSeq = maskedSeq.substring(0, 4) + "-" + maskedSeq.substring(4);
-        System.out.println("separatedSeq " + separatedSeq);
-        String separatedSeq1 = separatedSeq.substring(0,separatedSeq.length()-4) + "-" + separatedSeq.substring(separatedSeq.length()-4);
-        System.out.println("separatedSeq1 " + separatedSeq1); */
+        /* To-DO -
+        Using StringUtils as below , will allow using '$' as masking char.
+        Right now running program from command line is not able to resolve StringUtils.
+        And so as an alternative replaceAll option is used. This however has a limitation on Using '$' for masking char.
+        Since 'replaceAll' uses regex and '$' has a special meaning in regex.
+         */
+        //String maskedSeq = StringUtils.repeat(""+maskingChar, creditCardNumber.length()-4) + creditCardNumber.substring(creditCardNumber.length()-4);
+        String maskedSeq =  (creditCardNumber.substring(0,creditCardNumber.length()-4)).replaceAll(".",""+maskingChar) + creditCardNumber.substring(creditCardNumber.length()-4);
 
         StringBuilder str = new StringBuilder(maskedSeq);
         return (str.insert(4,'-')).insert(str.length()-4, '-');
@@ -72,14 +74,15 @@ public class CreditCardMasking {
     public static void main(String[] arguments) {
         System.out.println("*****************************************************************************");
         System.out.println("Enter below Credit Card number of 13 to 16 digits, and Character to Mask with");
+        System.out.println("Note - The program doesnt support $ for masking for now.");
         System.out.println("*****************************************************************************");
 
         CreditCardMasking ccm = new CreditCardMasking();
         Scanner in = new Scanner(System.in);
         System.out.println("Enter credit card number");
-        ccm.creditCardNumber = in.nextLine();
+        ccm.setCreditCardNumber(in.nextLine());
         System.out.println("Enter charter for masking");
-        ccm.maskingChar = in.next().charAt(0);
+        ccm.setMaskingChar(in.next().charAt(0));
         System.out.println("Your Credit Card number " + ccm.maskCreditCardNumber() + " Has Won the inFamous COCA COLA LOTTERY!!!");
     }
 }
